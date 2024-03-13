@@ -32,28 +32,29 @@ fn narrow_down_greys<'a>(grey_letters: &'a str, valid_words: Vec<&'a str>) -> Ve
     return narrowed_vector;
 }
 
+fn get_valid_words<'a>(green_str: &'a str, yellow_str: &'a str, grey_str: &'a str, word_vector: Vec<&'a str>) -> Vec<&'a str> {
+    let valid_words_green = narrow_down_greens(green_str, word_vector);
+    let valid_words_yellow = narrow_down_yellows(yellow_str, valid_words_green);
+    let valid_words_grey = narrow_down_greys(grey_str, valid_words_yellow);
+    return valid_words_grey;
+}
+fn suggest_word<'a>(green_str: &'a str, yellow_str: &'a str, grey_str: &'a str, word_vector: Vec<&'a str>) -> &'a str {
+    let valid_words = get_valid_words(green_str, yellow_str, grey_str, word_vector);
+    return valid_words[0];
+}
+
 fn main() {
-    let start = Instant::now();
-
-    let wordle_string = fs::read_to_string("src/words.txt").expect("ReadFileError: Could not read file");
-    let word_vector: Vec<&str> = wordle_string.split("\n").collect();
-
-    println!("Time to load file into array: {:?}", start.elapsed());
 
     let green_str = "eag__";
     let yellow_str = "l";
     let grey_str = "y";
 
-    let overall = Instant::now();
+    let words_string = fs::read_to_string("src/words.txt").expect("Error reading file");
+    let word_vector = words_string.lines().collect();
 
-    let valid_words_green = narrow_down_greens(green_str, word_vector);
-    println!("Time elapsed to calculate green words: {:?}", overall.elapsed());
-
-    let valid_words_yellow = narrow_down_yellows(yellow_str, valid_words_green);
-    println!("Time elapsed to calculate yellow words: {:?}", overall.elapsed());
-
-    let narrow_down_greys = narrow_down_greys(grey_str, valid_words_yellow);
-
-    println!("{:?}", narrow_down_greys);
-    println!("Time elapsed to calculate valid words: {:?}", overall.elapsed());
+    let start = Instant::now();
+    let suggested_word = suggest_word(green_str, yellow_str, grey_str, word_vector);
+    let duration = start.elapsed();
+    println!("Suggested word: {}", suggested_word);
+    println!("Time to get suggested word is: {:?}", duration);
 }
