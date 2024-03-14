@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::filters::get_valid_words;
+
 fn string_counter(word: &str) -> HashMap<char, u8> {
     // Attempts to operate similar to how Counter() does in python
 
@@ -25,7 +27,7 @@ pub fn find_letter_distribution(word_vector: Vec<&str>) -> HashMap<String, u32> 
 
         for (char, count) in char_counter {
 
-            for a in 1..count+1{
+            for a in 1..=count{
                 let letter_code = a.to_string()+&char.to_string();
                 *distribution.entry(letter_code).or_insert(0) += 1;
             }
@@ -42,7 +44,7 @@ fn get_word_points(word: &str, letter_distribution: &HashMap<String, u32>) -> u3
     // There will be no value more than 1 in the hashmap
     for (char, count) in letter_counter {
 
-        for a in 1..count+1{
+        for a in 1..=count{
 
             let letter_code = a.to_string()+&char.to_string();
             points += letter_distribution.get(&letter_code).expect("No such key in hashmap");
@@ -63,4 +65,12 @@ pub fn get_highest_point_word(word_vector: Vec<&str>, letter_distribution: &Hash
         }
     }
     return highest_word.to_string();
+}
+
+
+pub fn suggest_word<'a>(green_str: &'a str, yellow_str: &'a str, grey_str: &'a str, word_vector: Vec<&'a str>) -> String {
+    let valid_words = get_valid_words(green_str, yellow_str, grey_str, word_vector);
+    let letter_distribution = find_letter_distribution(valid_words.clone());
+
+    return get_highest_point_word(valid_words, &letter_distribution)
 }
