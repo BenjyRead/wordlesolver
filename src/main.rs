@@ -3,13 +3,13 @@ use std::time::Instant;
 use std::collections::HashSet;
 
 mod filters;
+// use filters::{narrow_down_greens,narrow_down_greys,narrow_down_yellows};
+use filters::get_valid_words;
 
-fn get_valid_words<'a>(green_str: &'a str, yellow_str: &'a str, grey_str: &'a str, word_vector: Vec<&'a str>) -> Vec<&'a str> {
-    let valid_words_green = filters::narrow_down_greens(green_str, word_vector);
-    let valid_words_yellow = filters::narrow_down_yellows(yellow_str, valid_words_green);
-    let valid_words_grey = filters::narrow_down_greys(grey_str, valid_words_yellow);
-    return valid_words_grey;
-}
+mod distribution;
+use distribution::{find_letter_distribution, get_highest_point_word};
+
+
 
 fn word_has_duplicate_characters(word: &str) -> bool {
     let mut set = HashSet::new();
@@ -38,25 +38,20 @@ fn filter_duplicates(word_vector: Vec<&str>) -> Vec<&str> {
     return copy_vector;
 }
 
-
-fn suggest_word<'a>(green_str: &'a str, yellow_str: &'a str, grey_str: &'a str, word_vector: Vec<&'a str>) -> &'a str {
+fn suggest_word<'a>(green_str: &'a str, yellow_str: &'a str, grey_str: &'a str, word_vector: Vec<&'a str>) -> String {
     let valid_words = get_valid_words(green_str, yellow_str, grey_str, word_vector);
-    let valid_words = filter_duplicates(valid_words);
-    return valid_words[0];
+    let letter_distribution = find_letter_distribution(valid_words.clone());
+
+    return get_highest_point_word(valid_words, &letter_distribution)
 }
 
 fn main() {
 
-    let green_str = "_ea__";
-    let yellow_str = "l";
-    let grey_str = "";
-
     let words_string = fs::read_to_string("src/words.txt").expect("Error reading file");
-    let word_vector = words_string.lines().collect();
+    let word_vector: Vec<&str> = words_string.lines().collect();
 
-    let start = Instant::now();
-    let suggested_word = suggest_word(green_str, yellow_str, grey_str, word_vector);
-    let duration = start.elapsed();
-    println!("Suggested word: {}", suggested_word);
-    println!("Time to get suggested word is: {:?}", duration);
+    let green_str = "______";
+    let yellow_str = "";
+    let grey_str = "";
+    println!("Suggested word: {}", suggest_word(green_str, yellow_str, grey_str, word_vector));
 }
