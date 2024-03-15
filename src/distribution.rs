@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::filters::get_valid_words;
 
@@ -68,8 +68,9 @@ pub fn get_highest_point_word(word_vector: Vec<&str>, letter_distribution: &Hash
 }
 
 
-pub fn suggest_word<'a>(green_str: &'a str, yellow_str: &'a str, grey_str: &'a str, word_vector: Vec<&'a str>) -> String {
-    let valid_words = get_valid_words(green_str, yellow_str, grey_str, word_vector);
+pub fn suggest_word<'a>(green_str: &'a str, yellow_set: &'a HashSet<char>, grey_set: &'a HashSet<char>, word_vector: Vec<&'a str>) -> String {
+
+    let valid_words = get_valid_words(green_str, yellow_set, grey_set, word_vector);
     let letter_distribution = find_letter_distribution(valid_words.clone());
 
     return get_highest_point_word(valid_words, &letter_distribution)
