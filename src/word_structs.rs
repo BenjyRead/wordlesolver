@@ -21,3 +21,19 @@ impl Hash for Word {
         self.word.hash(state); // hash only the word attribute
     }
 }
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_word_new() {
+        let word = Word::new("hello".to_string());
+        assert_eq!(word.word, "hello");
+        assert_eq!(word.letters,
+                   HashSet::from_iter(
+                       ["h0", "e0", "l0", "l1", "o0"]
+                           .iter()
+                           .map(|s| String::from(*s))
+                    ));
+    }
+}

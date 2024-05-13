@@ -35,7 +35,7 @@ pub fn get_letter_distribution(words: &HashSet<Word>) -> HashMap<String, u32> {
     return letter_distribution;
 }
 
-pub fn get_word_points(word: &Word, distribution: &HashMap<String, u32>) -> u32 {
+fn get_word_points(word: &Word, distribution: &HashMap<String, u32>) -> u32 {
     let mut points = 0;
 
     for letter in &word.letters {
