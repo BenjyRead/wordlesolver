@@ -22,27 +22,47 @@ pub fn get_letter_set(word: &str) -> HashSet<String> {
     return letter_set;
 }
 
-pub fn get_letter_distribution(words: HashSet<Word>) -> HashMap<String, u32> {
+pub fn get_letter_distribution(words: &HashSet<Word>) -> HashMap<String, u32> {
     let mut letter_distribution = HashMap::new();
 
     for word in words{
-        let letters = word.letters;
+        let letters = &word.letters;
         for letter in letters {
-            *letter_distribution.entry(letter).or_insert(0) += 1;
+            *letter_distribution.entry(letter.clone()).or_insert(0) += 1;
         }
     }
 
     return letter_distribution;
 }
 
-pub fn get_word_points(word: Word, distribution: HashMap<String, u32>) -> u32 {
+pub fn get_word_points(word: &Word, distribution: &HashMap<String, u32>) -> u32 {
     let mut points = 0;
 
-    for letter in word.letters {
-        points += distribution.get(&letter).unwrap();
+    for letter in &word.letters {
+        points += distribution.get(letter).unwrap();
     }
 
     return points;
+}
+
+pub fn get_highest_point_word(words: &HashSet<Word>, distribution: &HashMap<String, u32>) -> Word {
+    let mut highest_point_word: Option<&Word> = None;
+    let mut highest_points = 0;
+
+    for word in words {
+        let points = get_word_points(&word, &distribution);
+
+        if points > highest_points {
+            highest_points = points;
+            highest_point_word = Some(&word);
+        }
+    }
+
+    if highest_point_word.is_none(){
+        panic!("No words in the set");
+    }else{
+        return highest_point_word.unwrap().clone();
+    }
 }
 
 #[cfg(test)]
@@ -120,7 +140,7 @@ mod tests {
         ];
 
         for (words, distribution) in test_get_letter_distribution_test_cases {
-            assert_eq!(get_letter_distribution(words), distribution);
+            assert_eq!(get_letter_distribution(&words), distribution);
         }
     }
 
@@ -138,7 +158,7 @@ mod tests {
                         .map(|(k, v)| (k.to_string(), v)),
                     );
 
-                    assert_eq!(get_word_points(word, distribution), $expected_points);
+                    assert_eq!(get_word_points(&word, &distribution), $expected_points);
                 }
 
             )*
@@ -148,5 +168,38 @@ mod tests {
     test_get_word_points!(
         test_get_word_points_0, "hello", [("h0", 1), ("e0", 1), ("l0", 2), ("l1", 1), ("o0", 2), ("w0", 1), ("r0", 1), ("d0", 1)], 7,
         test_get_word_points_1, "world", [("h0", 1), ("e0", 1), ("l0", 2), ("l1", 1), ("o0", 2), ("w0", 1), ("r0", 1), ("d0", 1)], 7
+    );
+
+    macro_rules! test_get_highest_point_word{
+        ($($function_name:ident, [$($word_string:expr), *] , [ $(($letter2char:expr,$letter_points:expr)), *], $expected_word:expr), + ) =>{
+            $(
+
+                #[test]
+                fn $function_name(){
+                    let words = HashSet::from_iter(
+                        [ $(
+                            Word::new(String::from($word_string))
+                            )
+                        , *
+                        ]
+                        .into_iter()
+                    );
+
+                    let distribution: HashMap::<String, u32> = HashMap::from_iter(
+                        [ $(($letter2char.to_string(), $letter_points)), * ]
+                        .into_iter()
+                        .map(|(k, v)| (k.to_string(), v)),
+                    );
+
+                    assert_eq!(get_highest_point_word(&words, &distribution).word, $expected_word);
+                }
+
+            )*
+        };
+    }
+
+    test_get_highest_point_word!(
+        test_get_highest_point_word_0, ["hello"], [("h0", 1), ("e0", 1), ("l0", 2), ("l1", 1), ("o0", 2), ("w0", 1), ("r0", 1), ("d0", 1)], "hello",
+        test_get_highest_point_word_1, ["hello","worldy"], [("h0", 1), ("e0", 1), ("l0", 2), ("l1", 1), ("o0", 2), ("w0", 1), ("r0", 1), ("d0", 1), ("y0", 1)], "worldy" //TODO: make better test with 2 5 letter words
     );
 }

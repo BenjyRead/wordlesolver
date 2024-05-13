@@ -3,7 +3,7 @@ use crate::word_processing::get_letter_set;
 use std::hash::Hash;
 
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Clone)]
 pub struct Word {
     pub word: String,
     pub letters: HashSet<String>,
