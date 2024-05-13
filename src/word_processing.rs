@@ -35,6 +35,16 @@ pub fn get_letter_distribution(words: HashSet<Word>) -> HashMap<String, u32> {
     return letter_distribution;
 }
 
+pub fn get_word_points(word: Word, distribution: HashMap<String, u32>) -> u32 {
+    let mut points = 0;
+
+    for letter in word.letters {
+        points += distribution.get(&letter).unwrap();
+    }
+
+    return points;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -113,4 +123,30 @@ mod tests {
             assert_eq!(get_letter_distribution(words), distribution);
         }
     }
+
+    macro_rules! test_get_word_points{
+        ($($function_name:ident, $word:expr, [ $(($letter2char:expr,$letter_points:expr)), *], $expected_points:expr), + ) =>{
+            $(
+
+                #[test]
+                fn $function_name(){
+                    let word = Word::new(String::from($word));
+
+                    let distribution: HashMap::<String, u32> = HashMap::from_iter(
+                        [ $(($letter2char.to_string(), $letter_points)), * ]
+                        .into_iter()
+                        .map(|(k, v)| (k.to_string(), v)),
+                    );
+
+                    assert_eq!(get_word_points(word, distribution), $expected_points);
+                }
+
+            )*
+        };
+    }
+
+    test_get_word_points!(
+        test_get_word_points_0, "hello", [("h0", 1), ("e0", 1), ("l0", 2), ("l1", 1), ("o0", 2), ("w0", 1), ("r0", 1), ("d0", 1)], 7,
+        test_get_word_points_1, "world", [("h0", 1), ("e0", 1), ("l0", 2), ("l1", 1), ("o0", 2), ("w0", 1), ("r0", 1), ("d0", 1)], 7
+    );
 }
