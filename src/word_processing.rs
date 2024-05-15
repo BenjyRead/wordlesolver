@@ -1,31 +1,35 @@
-use std::collections::{HashMap, HashSet};
 use crate::word_structs::Word;
+use std::collections::{HashMap, HashSet};
 
 fn string_counter(word: &str) -> HashMap<char, u32> {
     return word.chars().fold(HashMap::new(), |mut counter, c| {
         *counter.entry(c).or_insert(0) += 1;
-        return counter
+        return counter;
     });
 }
 
 pub fn get_letter_set(word: &str) -> HashSet<String> {
+    if word.len() != 5 {
+        panic!("Word must be 5 characters long");
+    }
+
     let counter = string_counter(word);
 
-    let mut letter_set = HashSet::new();
+    let mut letters = HashSet::new();
 
     for (letter, count) in counter {
         for a in 0..count {
-            letter_set.insert(format!("{}{}", letter, a));
+            letters.insert(format!("{}{}", letter, a));
         }
     }
 
-    return letter_set;
+    return letters;
 }
 
 pub fn get_letter_distribution(words: &HashSet<Word>) -> HashMap<String, u32> {
     let mut letter_distribution = HashMap::new();
 
-    for word in words{
+    for word in words {
         let letters = &word.letters;
         for letter in letters {
             *letter_distribution.entry(letter.clone()).or_insert(0) += 1;
@@ -58,9 +62,9 @@ pub fn get_highest_point_word(words: &HashSet<Word>, distribution: &HashMap<Stri
         }
     }
 
-    if highest_point_word.is_none(){
+    if highest_point_word.is_none() {
         panic!("No words in the set");
-    }else{
+    } else {
         return highest_point_word.unwrap().clone();
     }
 }
@@ -91,53 +95,66 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_get_letter_set() {
-        let test_get_letter_set_test_cases = [
-            (
-                "hello",
-                HashSet::from_iter(
-                    ["h0", "e0", "l0", "l1", "o0"].into_iter().map(String::from),
-                ),
-            ),
-            (
-                "world",
-                HashSet::from_iter(
-                    ["w0", "o0", "r0", "l0", "d0"]
-                    .into_iter()
-                    .map(String::from),
-                ),
-            ),
-            (
-                "lllll",
-                HashSet::from_iter(
-                    ["l0", "l1", "l2", "l3", "l4"]
-                    .into_iter()
-                    .map(String::from),
-                ),
-            ),
-        ];
+    macro_rules! test_get_letter_set {
+        ($($function_name: ident, $word: expr, [$($letter:expr), *]), *) => {
+            $(
+                #[test]
+                fn $function_name() {
+                    let letters = HashSet::from([$(String::from($letter)), *]);
 
-        for (word, hashset) in test_get_letter_set_test_cases {
-            assert_eq!(get_letter_set(word), hashset);
+
+                    assert_eq!(get_letter_set($word), letters);
+                }
+            )*
         }
     }
 
+    macro_rules! test_get_letter_set_error {
+        ($($function_name: ident, $word: expr, $panic_message: expr), *) => {
+            $(
+                #[test]
+                #[should_panic(expected = $panic_message)]
+                fn $function_name() {
+                    get_letter_set($word);
+                }
+            )*
+        }
+    }
+
+    test_get_letter_set! {
+        test_get_letter_set_hello, "hello", ["h0", "e0", "l0", "l1", "o0"],
+        test_get_letter_set_world, "world", ["w0", "o0", "r0", "l0", "d0"],
+        test_get_letter_set_lllll, "lllll", ["l0", "l1", "l2", "l3", "l4"]
+    }
+
+    test_get_letter_set_error! {
+        test_get_letter_set_error_empty, "", "Word must be 5 characters long",
+        test_get_letter_set_error_4_characters, "hell", "Word must be 5 characters long",
+        test_get_letter_set_error_6_characters, "helloo", "Word must be 5 characters long"
+    }
+
     #[test]
-    fn test_get_letter_distribution(){
-        let test_get_letter_distribution_test_cases = [
-            (
-                HashSet::from([
-                        Word::new(String::from("hello")),
-                        Word::new(String::from("world")),
-                ]),
-                HashMap::<String, u32>::from_iter(
-                    [("h0", 1), ("e0", 1), ("l0", 2), ("l1", 1), ("o0", 2), ("w0", 1), ("r0", 1), ("d0", 1)]
-                    .into_iter()
-                    .map(|(k, v)| (k.to_string(), v)),
-                ),
+    fn test_get_letter_distribution() {
+        let test_get_letter_distribution_test_cases = [(
+            HashSet::from([
+                Word::new(String::from("hello")),
+                Word::new(String::from("world")),
+            ]),
+            HashMap::<String, u32>::from_iter(
+                [
+                    ("h0", 1),
+                    ("e0", 1),
+                    ("l0", 2),
+                    ("l1", 1),
+                    ("o0", 2),
+                    ("w0", 1),
+                    ("r0", 1),
+                    ("d0", 1),
+                ]
+                .into_iter()
+                .map(|(k, v)| (k.to_string(), v)),
             ),
-        ];
+        )];
 
         for (words, distribution) in test_get_letter_distribution_test_cases {
             assert_eq!(get_letter_distribution(&words), distribution);
@@ -166,8 +183,32 @@ mod tests {
     }
 
     test_get_word_points!(
-        test_get_word_points_0, "hello", [("h0", 1), ("e0", 1), ("l0", 2), ("l1", 1), ("o0", 2), ("w0", 1), ("r0", 1), ("d0", 1)], 7,
-        test_get_word_points_1, "world", [("h0", 1), ("e0", 1), ("l0", 2), ("l1", 1), ("o0", 2), ("w0", 1), ("r0", 1), ("d0", 1)], 7
+        test_get_word_points_0,
+        "hello",
+        [
+            ("h0", 1),
+            ("e0", 1),
+            ("l0", 2),
+            ("l1", 1),
+            ("o0", 2),
+            ("w0", 1),
+            ("r0", 1),
+            ("d0", 1)
+        ],
+        7,
+        test_get_word_points_1,
+        "world",
+        [
+            ("h0", 1),
+            ("e0", 1),
+            ("l0", 2),
+            ("l1", 1),
+            ("o0", 2),
+            ("w0", 1),
+            ("r0", 1),
+            ("d0", 1)
+        ],
+        7
     );
 
     macro_rules! test_get_highest_point_word{
@@ -199,7 +240,32 @@ mod tests {
     }
 
     test_get_highest_point_word!(
-        test_get_highest_point_word_0, ["hello"], [("h0", 1), ("e0", 1), ("l0", 2), ("l1", 1), ("o0", 2), ("w0", 1), ("r0", 1), ("d0", 1)], "hello",
-        test_get_highest_point_word_1, ["hello","worldy"], [("h0", 1), ("e0", 1), ("l0", 2), ("l1", 1), ("o0", 2), ("w0", 1), ("r0", 1), ("d0", 1), ("y0", 1)], "worldy" //TODO: make better test with 2 5 letter words
+        test_get_highest_point_word_0,
+        ["hello"],
+        [
+            ("h0", 1),
+            ("e0", 1),
+            ("l0", 2),
+            ("l1", 1),
+            ("o0", 2),
+            ("w0", 1),
+            ("r0", 1),
+            ("d0", 1)
+        ],
+        "hello",
+        test_get_highest_point_word_1,
+        ["hello", "world", "ellow"],
+        [
+            ("h0", 1),
+            ("e0", 2),
+            ("l0", 3),
+            ("l1", 2),
+            ("o0", 3),
+            ("w0", 2),
+            ("r0", 1),
+            ("d0", 1),
+            ("y0", 1)
+        ],
+        "ellow" //TODO: make more better tests
     );
 }

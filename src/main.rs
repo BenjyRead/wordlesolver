@@ -1,3 +1,4 @@
+mod filtering;
 mod word_processing;
 mod word_structs;
 
