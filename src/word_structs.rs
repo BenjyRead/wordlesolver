@@ -13,7 +13,7 @@ pub struct Word {
 impl Word {
     pub fn new(word: String) -> Word {
         let letters = get_letter_set(&word);
-        Word { word, letters }
+        return Word { word, letters };
     }
 }
 
@@ -31,9 +31,22 @@ pub struct GreyLetter {
 
 impl Hash for GreyLetter {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.letter.hash(state); // hash only the letter attribute
+        return self.letter.hash(state); // hash only the letter attribute
     }
 }
+
+#[derive(Eq, PartialEq, Clone, Hash)]
+pub struct GreenLetter {
+    //TODO: ensure exactly 2 characers
+    pub letter: char,
+    //NOTE: 0-indexed
+    pub position: u8,
+}
+
+// pub struct YellowLetter {
+//     pub letter: String,
+//     pub not_positions: HashSet<u8>,
+// }
 
 mod tests {
     use super::*;
@@ -50,13 +63,6 @@ mod tests {
             )*
         };
     }
-
-    // #[test]
-    // fn test_word_new() {
-    //     let word = Word::new("hello".to_string());
-    //     assert_eq!(word.word, "hello");
-    //     assert_eq!(word.letters, ["h0", "e0", "l0", "l1", "o0"]);
-    // }
 
     test_new_word! {
         test_new_word_hello, "hello", ["h0", "e0", "l0", "l1", "o0"],
