@@ -43,10 +43,18 @@ pub struct GreenLetter {
     pub position: u8,
 }
 
-// pub struct YellowLetter {
-//     pub letter: String,
-//     pub not_positions: HashSet<u8>,
-// }
+#[derive(Eq, PartialEq, Clone)]
+pub struct YellowCharacter {
+    pub letter: char,
+    pub not_positions: HashSet<u8>,
+    pub count: u8,
+}
+
+impl Hash for YellowCharacter {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.letter.hash(state); // hash only the letter attribute
+    }
+}
 
 mod tests {
     use super::*;

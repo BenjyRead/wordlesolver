@@ -1,4 +1,4 @@
-use crate::word_structs::{GreenLetter, GreyLetter, Word};
+use crate::word_structs::{GreenLetter, GreyLetter, Word, YellowCharacter};
 use std::collections::HashSet;
 
 fn filter_by_grey_letters(
@@ -27,6 +27,37 @@ fn filter_by_green_letters(
         for green_letter in green_letters {
             if word.word.chars().nth(green_letter.position as usize) != Some(green_letter.letter) {
                 filtered_words.remove(word);
+            }
+        }
+    }
+
+    return filtered_words;
+}
+
+fn filter_by_yellow_letters(
+    words: &HashSet<Word>,
+    yellow_letters: &HashSet<YellowCharacter>,
+) -> HashSet<Word> {
+    let mut filtered_words = words.clone();
+
+    for word in words {
+        for yellow_letter in yellow_letters {
+            if word
+                .word
+                .chars()
+                .filter(|letter| letter == &yellow_letter.letter)
+                .count()
+                < yellow_letter.count as usize
+            {
+                filtered_words.remove(word);
+            } else {
+                for (index, letter) in word.word.chars().enumerate() {
+                    if letter == yellow_letter.letter
+                        && yellow_letter.not_positions.contains(&(index as u8))
+                    {
+                        filtered_words.remove(word);
+                    }
+                }
             }
         }
     }
@@ -105,5 +136,41 @@ mod tests {
         test_filter_by_green_letters_3, ["hello", "world"], [('o', 4)], ["hello"],
         test_filter_by_green_letters_4, ["hello", "world"], [('o', 1)], ["world"],
         test_filter_by_green_letters_5, ["hello", "world"], [('l', 3)], ["hello", "world"]
+    }
+
+    macro_rules! test_filter_by_yellow_letters {
+        ($($function_name: ident, [$($word:expr), *], [$(($letter:expr, $not_positions:expr, $count:expr)), *], [$($answer:expr), *]), *) => {
+            $(
+                #[test]
+                fn $function_name() {
+                    let words = HashSet::from(
+                        [$(Word::new($word.to_string())), *]
+                    );
+
+                    let yellow_letters = HashSet::from(
+                        [$(YellowCharacter{letter: $letter, not_positions: HashSet::from($not_positions), count: $count}), *]
+                    );
+
+                    let answers = HashSet::from(
+                        [$(Word::new($answer.to_string())), *]
+                    );
+
+                    let filtered_words = filter_by_yellow_letters(&words, &yellow_letters);
+
+                    assert_eq!(filtered_words, answers);
+                }
+             )*
+        }
+    }
+
+    test_filter_by_yellow_letters! {
+        test_filter_by_yellow_letters_empty, [], [], [],
+        test_filter_by_yellow_letters_no_yellow, ["hello"], [], ["hello"],
+        test_filter_by_yellow_letters_0, ["hello"], [('h', [], 1)], ["hello"],
+        test_filter_by_yellow_letters_1, ["hello"], [('h', [0], 1)], [],
+        test_filter_by_yellow_letters_2, ["hello"], [('h', [1,2,3,4], 1)], ["hello"],
+        test_filter_by_yellow_letters_3, ["hello"], [('l', [0,1,4], 2)], ["hello"],
+        test_filter_by_yellow_letters_4, ["hello","world"], [('l', [0,1], 1)], ["hello", "world"],
+        test_filter_by_yellow_letters_5, ["hello","world"], [('l', [0,1,3], 1)], []
     }
 }
