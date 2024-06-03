@@ -65,6 +65,19 @@ fn filter_by_yellow_letters(
     return filtered_words;
 }
 
+pub fn filter_words(
+    words: &HashSet<Word>,
+    grey_letters: &HashSet<GreyLetter>,
+    green_letters: &HashSet<GreenLetter>,
+    yellow_letters: &HashSet<YellowCharacter>,
+) -> HashSet<Word> {
+    let mut filtered_words = filter_by_grey_letters(words, grey_letters);
+    filtered_words = filter_by_green_letters(&filtered_words, green_letters);
+    filtered_words = filter_by_yellow_letters(&filtered_words, yellow_letters);
+
+    return filtered_words;
+}
+
 mod tests {
     use super::*;
 

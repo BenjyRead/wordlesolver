@@ -35,7 +35,7 @@ impl Hash for GreyLetter {
     }
 }
 
-#[derive(Eq, PartialEq, Clone, Hash)]
+#[derive(Eq, PartialEq, Clone, Hash, Debug)]
 pub struct GreenLetter {
     //TODO: ensure exactly 2 characers
     pub letter: char,
