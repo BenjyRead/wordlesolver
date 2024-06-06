@@ -20,10 +20,10 @@ pub fn get_letter_vec(word: &str) -> Vec<String> {
 
     let mut letters = Vec::new();
 
-    for letter in word.chars() {
-        let num_code = string_counter(&word).get(&letter).unwrap();
+    for (a, letter) in word.chars().enumerate() {
+        let num_code = char_count(&word[0..=a], &letter) - 1;
 
-        letters.push(letter.to_string());
+        letters.push(letter.to_string() + &num_code.to_string());
     }
 
     return letters;
@@ -314,5 +314,28 @@ mod tests {
         "world",
         'z',
         0
+    );
+
+    macro_rules! test_get_letter_vec {
+        ($($function_name: ident, $word: expr, $answer_vec: expr), *) => {
+            $(
+                #[test]
+                fn $function_name() {
+                    assert_eq!(get_letter_vec($word), $answer_vec);
+                }
+            )*
+        }
+    }
+
+    test_get_letter_vec!(
+        test_get_letter_vec_0,
+        "hello",
+        vec!["h0", "e0", "l0", "l1", "o0"],
+        test_get_letter_vec_1,
+        "world",
+        vec!["w0", "o0", "r0", "l0", "d0"],
+        test_get_letter_vec_2,
+        "lllll",
+        vec!["l0", "l1", "l2", "l3", "l4"]
     );
 }
