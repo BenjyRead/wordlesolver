@@ -8,6 +8,27 @@ fn string_counter(word: &str) -> HashMap<char, u32> {
     });
 }
 
+fn char_count(word: &str, letter: &char) -> u32 {
+    return word.chars().filter(|&c| c == *letter).count() as u32;
+}
+
+//Mostly repeat code frmo get_letter_set
+pub fn get_letter_vec(word: &str) -> Vec<String> {
+    if word.len() != 5 {
+        panic!("Word must be 5 characters long");
+    }
+
+    let mut letters = Vec::new();
+
+    for letter in word.chars() {
+        let num_code = string_counter(&word).get(&letter).unwrap();
+
+        letters.push(letter.to_string());
+    }
+
+    return letters;
+}
+
 pub fn get_letter_set(word: &str) -> HashSet<String> {
     if word.len() != 5 {
         panic!("Word must be 5 characters long");
@@ -267,5 +288,31 @@ mod tests {
             ("y0", 1)
         ],
         "ellow" //TODO: make more better tests
+    );
+
+    macro_rules! test_char_count {
+        ($($function_name:ident, $word: expr, $char: expr, $count: expr), *) => {
+            $(
+                #[test]
+                fn $function_name() {
+                    assert_eq!(char_count(&$word, &$char), $count);
+                }
+            )*
+        };
+    }
+
+    test_char_count!(
+        test_char_count_0,
+        "hello",
+        'l',
+        2,
+        test_char_count_1,
+        "aaaaa",
+        'a',
+        5,
+        test_char_count_2,
+        "world",
+        'z',
+        0
     );
 }

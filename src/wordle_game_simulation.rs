@@ -1,4 +1,5 @@
 use crate::filtering::filter_words;
+use crate::word_processing::get_letter_vec;
 use crate::word_structs::{GreenLetter, GreyLetter, Word, YellowCharacter};
 use std::collections::HashSet;
 
@@ -12,6 +13,22 @@ fn get_greens(answer: &Word, guess: &Word, current_string: &mut String) {
         }
     }
 }
+
+//NOTE: Call after get_greens
+fn get_yellows(answer: &Word, guess: &Word, current_string: &mut String) {
+    let answer_letters = get_letter_vec(&answer.word);
+    let guess_letters = get_letter_vec(&guess.word);
+
+    for (position, character) in guess.word.chars().enumerate() {
+        if current_string.chars().nth(position) != Some('G') {
+            if answer_letters.contains(&character.to_string()) {
+                current_string.replace_range(position..=position, "Y");
+            }
+        }
+    }
+}
+
+//NOTE: call get_greens first, with 'ggggg' (5 greys)
 
 // fn get_colors(answer: &Word, guess: &Word) -> String {
 //     //5 character string
@@ -80,6 +97,16 @@ mod tests {
         "hello",
         "hello",
         "     ",
-        "GGGGG"
+        "GGGGG",
+        test_get_greens_3,
+        "hello",
+        "hello",
+        "ggggg",
+        "GGGGG",
+        test_get_greens_4,
+        "hello",
+        "world",
+        "ggggg",
+        "gggGg"
     );
 }
