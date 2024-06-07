@@ -154,6 +154,8 @@ mod tests {
         test_get_letter_set_error_6_characters, "helloo", "Word must be 5 characters long"
     }
 
+    //TODO: macro and more tests
+
     #[test]
     fn test_get_letter_distribution() {
         let test_get_letter_distribution_test_cases = [(

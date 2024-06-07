@@ -29,12 +29,16 @@ fn get_yellows(answer: &Word, guess: &Word, current_string: &mut String) {
     }
 }
 
-//NOTE: call get_greens first, with 'ggggg' (5 greys)
+fn get_colors(answer: &Word, guess: &Word) -> String {
+    //5 character string of greys
+    let mut colors = String::from("ggggg");
 
-// fn get_colors(answer: &Word, guess: &Word) -> String {
-//     //5 character string
-//     let mut colors = String::from("     ");
-// }
+    //NOTE: not commutative
+    get_greens(answer, guess, &mut colors);
+    get_yellows(answer, guess, &mut colors);
+
+    return colors;
+}
 
 pub fn simulate_game(
     answer: &Word,
@@ -150,4 +154,25 @@ mod tests {
         "ggggg",
         "ggggg"
     );
+
+    macro_rules! test_get_colors {
+        ($($function_name: ident, $guess: expr, $answer: expr, $solution: expr), *) => {
+            $ (
+                #[test]
+                fn $function_name() {
+                    let guess = Word::new($guess.to_string());
+                    let answer = Word::new($answer.to_string());
+
+                    assert_eq!(get_colors(&answer, &guess), $solution);
+                }
+            )*
+        };
+    }
+
+    test_get_colors! {
+        test_get_colors_1, "hello", "world", "ggYGY",
+        test_get_colors_2, "hello", "hello", "GGGGG",
+        test_get_colors_3, "aabbb", "bbaaa", "YYYYg",
+        test_get_colors_4, "hello", "zzzzz", "ggggg"
+    }
 }
