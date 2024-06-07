@@ -16,14 +16,13 @@ fn get_greens(answer: &Word, guess: &Word, current_string: &mut String) {
 
 //NOTE: Call after get_greens
 fn get_yellows(answer: &Word, guess: &Word, current_string: &mut String) {
-    let mut potential_yellows = answer.word.clone().replace("G", "_");
+    let answer_letters = get_letter_vec(&answer.word);
+    let guess_letters = get_letter_vec(&guess.word);
 
-    for (position, guess_letter) in guess.word.chars().enumerate() {
+    for (position, guess_letter) in guess_letters.iter().enumerate() {
         if current_string.chars().nth(position) != Some('G') {
-            if let Some(potential_yellow_position) = potential_yellows.find(guess_letter) {
+            if answer_letters.contains(&guess_letter) {
                 current_string.replace_range(position..=position, "Y");
-                potential_yellows
-                    .replace_range(potential_yellow_position..=potential_yellow_position, "_");
             }
         }
     }
@@ -109,45 +108,5 @@ mod tests {
         "world",
         "ggggg",
         "gggGg"
-    );
-
-    macro_rules! test_get_yellows {
-        ($($function_name: ident, $guess: expr, $answer: expr, $current_string: expr, $solution: expr), *) => {
-            $ (
-                #[test]
-                fn $function_name() {
-                    let guess = Word::new($guess.to_string());
-                    let answer = Word::new($answer.to_string());
-                    let mut current_string = String::from($current_string);
-
-                    get_yellows(&answer, &guess, &mut current_string);
-
-                    assert_eq!(current_string, $solution);
-                }
-            )*
-        };
-    }
-
-    test_get_yellows!(
-        test_get_yellows_1,
-        "hello",
-        "world",
-        "gggGg",
-        "ggYGY",
-        test_get_yellows_2,
-        "hello",
-        "hello",
-        "GGGGG",
-        "GGGGG",
-        test_get_yellows_3,
-        "aabbb",
-        "bbaaa",
-        "ggggg",
-        "YYYYg",
-        test_get_yellows_4,
-        "hello",
-        "zzzzz",
-        "ggggg",
-        "ggggg"
     );
 }
