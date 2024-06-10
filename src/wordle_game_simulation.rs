@@ -40,11 +40,75 @@ fn get_colors(answer: &Word, guess: &Word) -> String {
     return colors;
 }
 
+//TODO: write tests
+fn store_colors(
+    guess: &Word,
+    colors: &str,
+    green_letters: &mut HashSet<GreenLetter>,
+    yellow_characters: &mut HashSet<YellowCharacter>,
+    grey_letters: &mut HashSet<GreyLetter>,
+) {
+    for (position, letter) in colors.chars().enumerate() {
+        match letter {
+            'G' => {
+                green_letters.insert(GreenLetter {
+                    letter,
+                    position: position as u8,
+                });
+            }
+            'Y' => {
+                let found: Option<YellowCharacter> = yellow_characters
+                    .iter()
+                    .find(|x| x.letter == letter)
+                    .cloned();
+
+                if let Some(mut yellow_character) = found {
+                    //if yellow_character.count is lower than the actual count of letters that
+                    //are yellow in the word, change it to the actual count
+
+                    if let Ok(yellow_letter_count) = colors
+                        .chars()
+                        .enumerate()
+                        .filter(|&(index, element)| {
+                            element == 'Y'
+                                && &guess.word.chars().nth(index) == &Some(yellow_character.letter)
+                        })
+                        .count()
+                        .try_into()
+                    {
+                        if yellow_character.count < yellow_letter_count {
+                            yellow_character.count = yellow_letter_count;
+                        }
+                    }
+
+                    yellow_character.not_positions.insert(position as u8);
+                } else {
+                    yellow_characters.insert(YellowCharacter {
+                        letter,
+                        not_positions: vec![position as u8].into_iter().collect::<HashSet<u8>>(),
+                        count: 1,
+                    });
+                }
+            }
+            'g' => {
+                grey_letters.insert(GreyLetter {
+                    letter: get_letter_vec(&guess.word)[position].clone(),
+                });
+            }
+            _ => {
+                panic!("Invalid color");
+            }
+        }
+    }
+}
+
 pub fn simulate_game(
     answer: &Word,
     valid_guess_words: &HashSet<Word>,
     valid_answer_words: &HashSet<Word>,
 ) -> i8 {
+    println!("Answer = {}", answer.word);
+
     let mut green_letters: HashSet<GreenLetter> = HashSet::new();
     let mut yellow_characters: HashSet<YellowCharacter> = HashSet::new();
     let mut grey_letters: HashSet<GreyLetter> = HashSet::new();
@@ -63,10 +127,40 @@ pub fn simulate_game(
             &get_letter_distribution(&valid_guess_words),
         );
 
+        println!("Guess = {}", guess.word);
+
         if &guess == answer {
             print!("Answer = {}, in {} tries", guess.word, turn_count);
             return turn_count.try_into().unwrap();
         }
+
+        let colors = get_colors(&answer, &guess);
+
+        store_colors(
+            &guess,
+            &colors,
+            &mut green_letters,
+            &mut yellow_characters,
+            &mut grey_letters,
+        );
+
+        println!("green letters = {:?}", green_letters);
+        println!("yellow characters = {:?}", yellow_characters);
+        println!("grey letters = {:?}", grey_letters);
+
+        valid_guess_words = filter_words(
+            &valid_guess_words,
+            &grey_letters,
+            &green_letters,
+            &yellow_characters,
+        );
+
+        valid_answer_words = filter_words(
+            &valid_answer_words,
+            &grey_letters,
+            &green_letters,
+            &yellow_characters,
+        );
     }
 
     return -1;

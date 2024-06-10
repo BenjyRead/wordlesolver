@@ -23,7 +23,7 @@ impl Hash for Word {
     }
 }
 
-#[derive(Eq, PartialEq, Clone)]
+#[derive(Eq, PartialEq, Clone, Debug)]
 pub struct GreyLetter {
     // TODO: ensure exactly 2 characers
     pub letter: String,
@@ -43,7 +43,7 @@ pub struct GreenLetter {
     pub position: u8,
 }
 
-#[derive(Eq, PartialEq, Clone)]
+#[derive(Eq, PartialEq, Clone, Debug)]
 pub struct YellowCharacter {
     pub letter: char,
     pub not_positions: HashSet<u8>,

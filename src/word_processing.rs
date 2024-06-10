@@ -8,7 +8,7 @@ fn string_counter(word: &str) -> HashMap<char, u32> {
     });
 }
 
-fn char_count(word: &str, letter: &char) -> u32 {
+pub fn char_count(word: &str, letter: &char) -> u32 {
     return word.chars().filter(|&c| c == *letter).count() as u32;
 }
 

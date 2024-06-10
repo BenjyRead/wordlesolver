@@ -19,16 +19,16 @@ fn read_lines_from_file(file_path: &str) -> Vec<String> {
 }
 
 fn main() {
-    // let valid_guess_words: HashSet<Word> = read_lines_from_file("assets/valid_guess_words.txt")
-    //     .into_iter()
-    //     .map(|word| Word::new(word))
-    //     .collect();
-    // let valid_answer_words: HashSet<Word> = read_lines_from_file("assets/valid_answer_words.txt")
-    //     .into_iter()
-    //     .map(|word| Word::new(word))
-    //     .collect();
-    //
-    // for answer in valid_answer_words {
-    //     simulate_game(&answer, &valid_guess_words, &valid_answer_words);
-    // }
+    let valid_guess_words: HashSet<Word> = read_lines_from_file("assets/valid_guess_words.txt")
+        .into_iter()
+        .map(|word| Word::new(word))
+        .collect();
+    let valid_answer_words: HashSet<Word> = read_lines_from_file("assets/valid_answer_words.txt")
+        .into_iter()
+        .map(|word| Word::new(word))
+        .collect();
+
+    for answer in &valid_answer_words {
+        simulate_game(answer, &valid_guess_words, &valid_answer_words);
+    }
 }
