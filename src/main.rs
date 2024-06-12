@@ -28,7 +28,11 @@ fn main() {
         .map(|word| Word::new(word))
         .collect();
 
+    let x = valid_answer_words.len();
+    let mut count = 0;
     for answer in &valid_answer_words {
-        simulate_game(answer, &valid_guess_words, &valid_answer_words);
+        count += simulate_game(answer, &valid_guess_words, &valid_answer_words);
     }
+
+    println!("Average number of guesses: {}", count as f64 / x as f64);
 }

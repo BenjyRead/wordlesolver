@@ -48,18 +48,20 @@ fn store_colors(
     yellow_characters: &mut HashSet<YellowCharacter>,
     grey_letters: &mut HashSet<GreyLetter>,
 ) {
-    for (position, letter) in colors.chars().enumerate() {
-        match letter {
+    for (position, (color_letter, guess_letter)) in
+        colors.chars().zip(guess.word.chars()).enumerate()
+    {
+        match color_letter {
             'G' => {
                 green_letters.insert(GreenLetter {
-                    letter,
+                    letter: guess_letter,
                     position: position as u8,
                 });
             }
             'Y' => {
                 let found: Option<YellowCharacter> = yellow_characters
                     .iter()
-                    .find(|x| x.letter == letter)
+                    .find(|x| x.letter == guess_letter)
                     .cloned();
 
                 if let Some(mut yellow_character) = found {
@@ -84,7 +86,7 @@ fn store_colors(
                     yellow_character.not_positions.insert(position as u8);
                 } else {
                     yellow_characters.insert(YellowCharacter {
-                        letter,
+                        letter: guess_letter,
                         not_positions: vec![position as u8].into_iter().collect::<HashSet<u8>>(),
                         count: 1,
                     });
@@ -130,7 +132,7 @@ pub fn simulate_game(
         println!("Guess = {}", guess.word);
 
         if &guess == answer {
-            print!("Answer = {}, in {} tries", guess.word, turn_count);
+            println!("Answer = {}, in {} tries", guess.word, turn_count);
             return turn_count.try_into().unwrap();
         }
 
@@ -144,9 +146,9 @@ pub fn simulate_game(
             &mut grey_letters,
         );
 
-        println!("green letters = {:?}", green_letters);
-        println!("yellow characters = {:?}", yellow_characters);
-        println!("grey letters = {:?}", grey_letters);
+        // println!("green letters = {:?}", green_letters);
+        // println!("yellow characters = {:?}", yellow_characters);
+        // println!("grey letters = {:?}", grey_letters);
 
         valid_guess_words = filter_words(
             &valid_guess_words,
@@ -269,4 +271,103 @@ mod tests {
         test_get_colors_3, "aabbb", "bbaaa", "YYYYg",
         test_get_colors_4, "hello", "zzzzz", "ggggg"
     }
+
+    macro_rules! test_store_colors {
+        ($(
+            $function_name: ident,
+            $guess: expr,
+            $colors: expr,
+            [$(($green_letter_before_letter: expr, $green_letter_before_position: expr)), *],
+            [$(($yellow_character_before_letter: expr, $yellow_character_before_count: expr, $({$before_not_position: expr}), *)), *],
+            [$($grey_letter_before_letter: expr), *],
+            [$(($green_letter_after_letter: expr, $green_letter_after_position: expr)), *],
+            [$(($yellow_character_after_letter: expr, $yellow_character_after_count: expr, $({$after_not_position: expr}), *)), *],
+            [$($grey_letter_after_letter: expr), *]
+        ), *) => {
+            $ (
+                #[test]
+                fn $function_name() {
+                    let guess = Word::new($guess.to_string());
+                    let mut green_letters_before: HashSet<GreenLetter> = HashSet::new();
+                    $(
+                        green_letters_before.insert(GreenLetter {
+                            letter: $green_letter_before_letter,
+                            position: $green_letter_before_position
+                        });
+                    )*
+
+                    let mut yellow_characters_before: HashSet<YellowCharacter> = HashSet::new();
+                    $(
+                        let mut yellow_character_before = YellowCharacter {
+                            letter: $yellow_character_before_letter,
+                            count: $yellow_character_before_count,
+                            not_positions: HashSet::new()
+                        };
+                        $(
+                            yellow_character_before.not_positions.insert($before_not_position);
+                        )*
+                        yellow_characters_before.insert(yellow_character_before);
+                    )*
+
+                    let mut grey_letters_before: HashSet<GreyLetter> = HashSet::new();
+
+                    $(
+                        grey_letters_before.insert(GreyLetter {
+                            letter: $grey_letter_before_letter.to_string()
+                        });
+                    )*
+
+                    let mut green_letters_after: HashSet<GreenLetter> = HashSet::new();
+
+                    $(
+                        green_letters_after.insert(GreenLetter {
+                            letter: $green_letter_after_letter,
+                            position: $green_letter_after_position
+                        });
+                    )*
+
+                    let mut yellow_characters_after: HashSet<YellowCharacter> = HashSet::new();
+
+                    $(
+                        let mut yellow_character_after = YellowCharacter {
+                            letter: $yellow_character_after_letter,
+                            count: $yellow_character_after_count,
+                            not_positions: HashSet::new()
+                        };
+                        $(
+                            yellow_character_after.not_positions.insert($after_not_position);
+                        )*
+                        yellow_characters_after.insert(yellow_character_after);
+                    )*
+
+                    let mut grey_letters_after: HashSet<GreyLetter> = HashSet::new();
+
+                    $(
+                        grey_letters_after.insert(GreyLetter {
+                            letter: $grey_letter_after_letter.to_string()
+                        });
+                    )*
+
+                    store_colors(&guess, $colors, &mut green_letters_before, &mut yellow_characters_before, &mut grey_letters_before);
+
+                    assert_eq!(green_letters_before, green_letters_after);
+                    assert_eq!(yellow_characters_before, yellow_characters_after);
+                    assert_eq!(grey_letters_before, grey_letters_after);
+                }
+            )*
+        };
+    }
+
+    //TODO: more tests
+    test_store_colors!(
+        test_store_colors_1,
+        "hello",
+        "ggYGY",
+        [],
+        [],
+        [],
+        [('l', 3)],
+        [('l', 1, { 2 }), ('o', 1, { 4 })],
+        ["h0", "e0"]
+    );
 }
