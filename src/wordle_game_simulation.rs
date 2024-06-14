@@ -93,9 +93,32 @@ fn store_colors(
                 }
             }
             'g' => {
-                grey_letters.insert(GreyLetter {
-                    letter: get_letter_vec(&guess.word)[position].clone(),
-                });
+                //TODO: this aint right...
+                let amount_of_greys_of_letter_already_stored = &grey_letters
+                    .clone()
+                    .into_iter()
+                    .filter(|x| x.letter.chars().nth(0) == Some(guess_letter))
+                    .count();
+
+                let amount_of_grey_of_letter_in_word = colors
+                    .chars()
+                    .enumerate()
+                    .filter(|&(index, element)| {
+                        element == 'g' && &guess.word.chars().nth(index) == &Some(guess_letter)
+                    })
+                    .count();
+
+                let amount_of_additional_grey_letters_to_store =
+                    amount_of_grey_of_letter_in_word - amount_of_greys_of_letter_already_stored;
+
+                if amount_of_additional_grey_letters_to_store > 0 {
+                    for a in 0..amount_of_additional_grey_letters_to_store {
+                        let code = a + amount_of_greys_of_letter_already_stored;
+                        grey_letters.insert(GreyLetter {
+                            letter: guess_letter.to_string() + &code.to_string(),
+                        });
+                    }
+                }
             }
             _ => {
                 panic!("Invalid color");
@@ -104,6 +127,7 @@ fn store_colors(
     }
 }
 
+//TODO: write tests
 pub fn simulate_game(
     answer: &Word,
     valid_guess_words: &HashSet<Word>,
@@ -129,7 +153,14 @@ pub fn simulate_game(
             &get_letter_distribution(&valid_guess_words),
         );
 
-        println!("Guess = {}", guess.word);
+        if valid_answer_words.len() <= 10 {
+            println!("Answer words = {:?}", valid_answer_words);
+        }
+
+        println!(
+            "Guess = {}, green = {:?}, yellow = {:?}",
+            guess.word, green_letters, yellow_characters
+        );
 
         if &guess == answer {
             println!("Answer = {}, in {} tries", guess.word, turn_count);
@@ -366,6 +397,15 @@ mod tests {
         [],
         [],
         [],
+        [('l', 3)],
+        [('l', 1, { 2 }), ('o', 1, { 4 })],
+        ["h0", "e0"],
+        test_store_colors_2,
+        "hello",
+        "ggYGY",
+        [('l', 3)],
+        [('l', 1, { 2 }), ('o', 1, { 4 })],
+        ["h0", "e0"],
         [('l', 3)],
         [('l', 1, { 2 }), ('o', 1, { 4 })],
         ["h0", "e0"]

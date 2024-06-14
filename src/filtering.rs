@@ -65,6 +65,7 @@ fn filter_by_yellow_letters(
     return filtered_words;
 }
 
+//TODO: make tests
 pub fn filter_words(
     words: &HashSet<Word>,
     grey_letters: &HashSet<GreyLetter>,
@@ -112,7 +113,8 @@ mod tests {
         test_filter_by_grey_letters_0, ["hello"], ["l0"], [],
         test_filter_by_grey_letters_1, ["hello"], ["l1"], [],
         test_filter_by_grey_letters_2, ["hello"], ["l2"], ["hello"],
-        test_filter_by_grey_letters_3, ["aaaaa"], ["a0"], []
+        test_filter_by_grey_letters_3, ["aaaaa"], ["a0"], [],
+        test_filter_by_grey_letters_4, ["aaaaa"], ["a4"], []
     }
 
     macro_rules! test_filter_by_green_letters {
@@ -185,5 +187,54 @@ mod tests {
         test_filter_by_yellow_letters_3, ["hello"], [('l', [0,1,4], 2)], ["hello"],
         test_filter_by_yellow_letters_4, ["hello","world"], [('l', [0,1], 1)], ["hello", "world"],
         test_filter_by_yellow_letters_5, ["hello","world"], [('l', [0,1,3], 1)], []
+    }
+
+    macro_rules! test_filter_words {
+        ($(
+            $function_name: ident,
+            [$($word:expr), *],
+            [$($grey_letter:expr), *],
+            [$(($green_letter:expr, $position:expr)), *],
+            [$(($yellow_letter:expr, $not_positions:expr, $yellow_count:expr)), *],
+            [$($answer:expr), *]), *) =>
+        {
+            $(
+                #[test]
+                fn $function_name() {
+                    let words = HashSet::from(
+                        [$(Word::new($word.to_string())), *]
+                    );
+
+                    let grey_letters = HashSet::from(
+                        [$(GreyLetter{letter: $grey_letter.to_string()}), *]
+                    );
+
+                    let green_letters = HashSet::from(
+                        [$(GreenLetter{letter: $green_letter, position: $position as u8}), *]
+                    );
+
+                    let yellow_letters = HashSet::from(
+                        [$(YellowCharacter{letter: $yellow_letter, not_positions: HashSet::from($not_positions), count: $yellow_count}), *]
+                    );
+
+                    let answers = HashSet::from(
+                        [$(Word::new($answer.to_string())), *]
+                    );
+
+                    let filtered_words = filter_words(&words, &grey_letters, &green_letters, &yellow_letters);
+
+                    assert_eq!(filtered_words, answers);
+                }
+            )*
+        }
+    }
+
+    test_filter_words! {
+        test_filter_words_empty, [], [], [], [], [],
+        test_filter_words_no_filters, ["hello"], [], [], [], ["hello"],
+        test_filter_words_no_grey, ["hello"], [], [('h', 0)], [('h', [4], 1)], ["hello"],
+        //TODO: is there a conflict between yellow and green filters?
+        test_filter_words_1, ["hello", "world", "soare"], ["l0"], [], [], ["soare"],
+        test_filter_words_2, ["hello", "world", "soare"], ["l1"], [('l', 3)], [('l', [1,2,4], 1)], ["world"]
     }
 }

@@ -6,6 +6,7 @@ mod wordle_game_simulation;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::u128;
 
 use word_structs::Word;
 use wordle_game_simulation::simulate_game;
@@ -29,9 +30,16 @@ fn main() {
         .collect();
 
     let x = valid_answer_words.len();
-    let mut count = 0;
+    let mut fails: u32 = 0;
+    let mut count: u32 = 0;
     for answer in &valid_answer_words {
-        count += simulate_game(answer, &valid_guess_words, &valid_answer_words);
+        let y = simulate_game(answer, &valid_guess_words, &valid_answer_words);
+
+        if y != -1 {
+            count += y as u32;
+        } else {
+            fails += 1;
+        }
     }
 
     println!("Average number of guesses: {}", count as f64 / x as f64);
