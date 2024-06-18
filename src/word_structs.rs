@@ -31,10 +31,16 @@ impl Debug for Word {
     }
 }
 
-#[derive(Eq, PartialEq, Clone, Debug)]
+#[derive(Eq, Clone, Debug)]
 pub struct GreyLetter {
     // TODO: ensure exactly 2 characers
     pub letter: String,
+}
+
+impl PartialEq for GreyLetter {
+    fn eq(&self, other: &GreyLetter) -> bool {
+        return self.letter == other.letter;
+    }
 }
 
 impl Hash for GreyLetter {
@@ -51,7 +57,7 @@ pub struct GreenLetter {
     pub position: u8,
 }
 
-#[derive(Eq, PartialEq, Clone, Debug)]
+#[derive(Eq, Clone, Debug)]
 pub struct YellowCharacter {
     pub letter: char,
     pub not_positions: HashSet<u8>,
@@ -60,7 +66,13 @@ pub struct YellowCharacter {
 
 impl Hash for YellowCharacter {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.letter.hash(state); // hash only the letter attribute
+        self.letter.hash(state); // hash only the letter attribut
+    }
+}
+
+impl PartialEq for YellowCharacter {
+    fn eq(&self, other: &YellowCharacter) -> bool {
+        return self.letter == other.letter;
     }
 }
 
