@@ -1,9 +1,11 @@
 use crate::word_processing::get_letter_set;
 use std::collections::HashSet;
+use std::fmt;
+use std::fmt::Debug;
 use std::hash::Hash;
 
 //NOTE: Don't really know why I need to include some of these
-#[derive(Eq, PartialEq, Clone, Debug)]
+#[derive(Eq, PartialEq, Clone)]
 pub struct Word {
     // TODO: ensure exactly 2 characers
     pub word: String,
@@ -20,6 +22,12 @@ impl Word {
 impl Hash for Word {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.word.hash(state); // hash only the word attribute
+    }
+}
+
+impl Debug for Word {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Word ( {} )", self.word)
     }
 }
 

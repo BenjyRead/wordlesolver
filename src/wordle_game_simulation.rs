@@ -59,15 +59,16 @@ fn store_colors(
                 });
             }
             'Y' => {
-                let found: Option<YellowCharacter> = yellow_characters
+                let in_hashset_already: Option<YellowCharacter> = yellow_characters
                     .iter()
                     .find(|x| x.letter == guess_letter)
                     .cloned();
 
-                if let Some(mut yellow_character) = found {
+                if let Some(mut yellow_character) = in_hashset_already {
                     //if yellow_character.count is lower than the actual count of letters that
                     //are yellow in the word, change it to the actual count
 
+                    println!("1");
                     if let Ok(yellow_letter_count) = colors
                         .chars()
                         .enumerate()
@@ -83,7 +84,11 @@ fn store_colors(
                         }
                     }
 
+                    println!("{}", position as u8);
                     yellow_character.not_positions.insert(position as u8);
+                    yellow_characters.replace(yellow_character.clone());
+                    println!("{:?}", &yellow_character.not_positions);
+                    println!("{:?}", &yellow_characters);
                 } else {
                     yellow_characters.insert(YellowCharacter {
                         letter: guess_letter,
@@ -157,10 +162,7 @@ pub fn simulate_game(
             println!("Answer words = {:?}", valid_answer_words);
         }
 
-        println!(
-            "Guess = {}, green = {:?}, yellow = {:?}",
-            guess.word, green_letters, yellow_characters
-        );
+        println!("Guess = {}", guess.word);
 
         if &guess == answer {
             println!("Answer = {}, in {} tries", guess.word, turn_count);
@@ -175,6 +177,11 @@ pub fn simulate_game(
             &mut green_letters,
             &mut yellow_characters,
             &mut grey_letters,
+        );
+
+        println!(
+            "Greens = {:?}, Yellows = {:?}, Greys = {:?}",
+            green_letters, yellow_characters, grey_letters
         );
 
         // println!("green letters = {:?}", green_letters);
@@ -195,6 +202,17 @@ pub fn simulate_game(
             &yellow_characters,
         );
     }
+
+    println!("Answer words = {:?}", valid_answer_words);
+
+    println!(
+        r#"
+
+             Fail! Answer = {}
+
+             "#,
+        answer.word
+    );
 
     return -1;
 }
@@ -309,10 +327,10 @@ mod tests {
             $guess: expr,
             $colors: expr,
             [$(($green_letter_before_letter: expr, $green_letter_before_position: expr)), *],
-            [$(($yellow_character_before_letter: expr, $yellow_character_before_count: expr, $({$before_not_position: expr}), *)), *],
+            [$(($yellow_character_before_letter: expr, $yellow_character_before_count: expr, {$($before_not_position: expr), *})), *],
             [$($grey_letter_before_letter: expr), *],
             [$(($green_letter_after_letter: expr, $green_letter_after_position: expr)), *],
-            [$(($yellow_character_after_letter: expr, $yellow_character_after_count: expr, $({$after_not_position: expr}), *)), *],
+            [$(($yellow_character_after_letter: expr, $yellow_character_after_count: expr, {$($after_not_position: expr), *})), *],
             [$($grey_letter_after_letter: expr), *]
         ), *) => {
             $ (
@@ -393,7 +411,7 @@ mod tests {
     test_store_colors!(
         test_store_colors_1,
         "hello",
-        "ggYGY",
+        "ggYGY", // if the answer is 'world'
         [],
         [],
         [],
@@ -408,6 +426,15 @@ mod tests {
         ["h0", "e0"],
         [('l', 3)],
         [('l', 1, { 2 }), ('o', 1, { 4 })],
-        ["h0", "e0"]
+        ["h0", "e0"],
+        test_store_colors_3,
+        "lords",
+        "YGGgg",
+        [],
+        [('l', 1, { 2 }), ('o', 1, { 4 })],
+        ["h0", "e0"],
+        [('o', 1), ('r', 2)],
+        [('l', 1, { 0,2 }), ('o', 1, {4})],
+        ["h0", "e0", "d0", "s0"]
     );
 }
