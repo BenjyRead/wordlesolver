@@ -57,6 +57,58 @@ fn store_colors(
                     letter: guess_letter,
                     position: position as u8,
                 });
+
+                let already_identified_as_yellow = yellow_characters
+                    .iter()
+                    .find(|x| x.letter == guess_letter)
+                    .cloned();
+
+                if let Some(mut yellow_letter) = already_identified_as_yellow {
+                    //decrement the count of the yellow character, as one of them has been found
+                    println!("{:?}", &yellow_letter);
+
+                    yellow_letter.count -= 1;
+                    //we will keep count = 0 yellow characters, as if a yellow character is found
+                    //the not positions will still be useful
+                    yellow_characters.replace(yellow_letter);
+                }
+            }
+
+            'Y' | 'g' => {}
+
+            _ => {
+                panic!("Invalid color");
+            }
+        }
+    }
+
+    for (position, (color_letter, guess_letter)) in
+        colors.chars().zip(guess.word.chars()).enumerate()
+    {
+        match color_letter {
+            'G' => {
+                // green_letters.insert(GreenLetter {
+                //     letter: guess_letter,
+                //     position: position as u8,
+                // });
+                //
+                // let already_identified_as_yellow = yellow_characters
+                //     .iter()
+                //     .find(|x| x.letter == guess_letter)
+                //     .cloned();
+                //
+                // if let Some(mut yellow_letter) = already_identified_as_yellow {
+                //     //decrement the count of the yellow character, as one of them has been found
+                //     println!("{:?}", &yellow_letter);
+                //
+                //     yellow_letter.count -= 1;
+                //     if yellow_letter.count == 0 {
+                //         //remove the yellow character from the hashset as all of them have been found
+                //         yellow_characters.retain(|x| x.letter != guess_letter);
+                //     } else {
+                //         yellow_characters.replace(yellow_letter);
+                //     }
+                // }
             }
             'Y' => {
                 let in_hashset_already: Option<YellowCharacter> = yellow_characters
@@ -68,7 +120,6 @@ fn store_colors(
                     //if yellow_character.count is lower than the actual count of letters that
                     //are yellow in the word, change it to the actual count
 
-                    println!("1");
                     if let Ok(yellow_letter_count) = colors
                         .chars()
                         .enumerate()
@@ -84,11 +135,11 @@ fn store_colors(
                         }
                     }
 
-                    println!("{}", position as u8);
+                    // println!("{}", position as u8);
                     yellow_character.not_positions.insert(position as u8);
                     yellow_characters.replace(yellow_character.clone());
-                    println!("{:?}", &yellow_character.not_positions);
-                    println!("{:?}", &yellow_characters);
+                    // println!("{:?}", &yellow_character.not_positions);
+                    // println!("{:?}", &yellow_characters);
                 } else {
                     yellow_characters.insert(YellowCharacter {
                         letter: guess_letter,
@@ -435,6 +486,15 @@ mod tests {
         ["h0", "e0"],
         [('o', 1), ('r', 2)],
         [('l', 1, { 0,2 }), ('o', 1, {4})],
-        ["h0", "e0", "d0", "s0"]
+        ["h0", "e0", "d0", "s0"],
+        test_store_colors_4,
+        "world",
+        "GGGGG",
+        [],
+        [('l', 1, { 2 }), ('o', 1, { 4 })],
+        ["h0", "e0"],
+        [('w', 0), ('o', 1), ('r', 2), ('l', 3), ('d', 4)],
+        [('o', 0, {4}), ('l', 0, {2})],
+        ["h0", "e0"]
     );
 }
