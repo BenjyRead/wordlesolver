@@ -65,7 +65,6 @@ fn filter_by_yellow_letters(
     return filtered_words;
 }
 
-//TODO: make tests
 pub fn filter_words(
     words: &HashSet<Word>,
     grey_letters: &HashSet<GreyLetter>,

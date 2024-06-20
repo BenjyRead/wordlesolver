@@ -29,6 +29,9 @@ fn main() {
         .map(|word| Word::new(word))
         .collect();
 
+    // println!("{}", valid_guess_words.len());
+    // println!("{}", valid_answer_words.len());
+
     let x = valid_answer_words.len();
     let mut fails: u32 = 0;
     let mut count: u32 = 0;

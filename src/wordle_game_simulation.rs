@@ -40,7 +40,6 @@ fn get_colors(answer: &Word, guess: &Word) -> String {
     return colors;
 }
 
-//TODO: write tests
 fn store_colors(
     guess: &Word,
     colors: &str,
@@ -48,6 +47,7 @@ fn store_colors(
     yellow_characters: &mut HashSet<YellowCharacter>,
     grey_letters: &mut HashSet<GreyLetter>,
 ) {
+    //NOTE: do greens first so that all yellows removed are from previous guesses
     for (position, (color_letter, guess_letter)) in
         colors.chars().zip(guess.word.chars()).enumerate()
     {
@@ -65,7 +65,7 @@ fn store_colors(
 
                 if let Some(mut yellow_letter) = already_identified_as_yellow {
                     //decrement the count of the yellow character, as one of them has been found
-                    println!("{:?}", &yellow_letter);
+                    // println!("{:?}", &yellow_letter);
 
                     yellow_letter.count -= 1;
                     //we will keep count = 0 yellow characters, as if a yellow character is found
@@ -167,13 +167,13 @@ fn store_colors(
                 let amount_of_additional_grey_letters_to_store =
                     amount_of_grey_of_letter_in_word - amount_of_greys_of_letter_already_stored;
 
-                if amount_of_additional_grey_letters_to_store > 0 {
-                    for a in 0..amount_of_additional_grey_letters_to_store {
-                        let code = a + amount_of_greys_of_letter_already_stored;
-                        grey_letters.insert(GreyLetter {
-                            letter: guess_letter.to_string() + &code.to_string(),
-                        });
-                    }
+                //NOTE: doesnt loop if length is 0 or under, bc of rust thingies
+                for code in amount_of_greys_of_letter_already_stored.clone()
+                    ..amount_of_grey_of_letter_in_word.clone()
+                {
+                    grey_letters.insert(GreyLetter {
+                        letter: guess_letter.to_string() + &code.to_string(),
+                    });
                 }
             }
             _ => {
