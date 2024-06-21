@@ -1,5 +1,4 @@
 use crate::filtering::filter_words;
-use crate::word_processing::get_letter_vec;
 use crate::word_structs::{GreenLetter, GreyLetter, Word, YellowCharacter};
 use std::collections::HashSet;
 
@@ -67,7 +66,10 @@ fn store_colors(
                     //decrement the count of the yellow character, as one of them has been found
                     // println!("{:?}", &yellow_letter);
 
-                    yellow_letter.count -= 1;
+                    if yellow_letter.count > 0 {
+                        yellow_letter.count -= 1;
+                    }
+
                     //we will keep count = 0 yellow characters, as if a yellow character is found
                     //the not positions will still be useful
                     yellow_characters.replace(yellow_letter);
@@ -86,30 +88,7 @@ fn store_colors(
         colors.chars().zip(guess.word.chars()).enumerate()
     {
         match color_letter {
-            'G' => {
-                // green_letters.insert(GreenLetter {
-                //     letter: guess_letter,
-                //     position: position as u8,
-                // });
-                //
-                // let already_identified_as_yellow = yellow_characters
-                //     .iter()
-                //     .find(|x| x.letter == guess_letter)
-                //     .cloned();
-                //
-                // if let Some(mut yellow_letter) = already_identified_as_yellow {
-                //     //decrement the count of the yellow character, as one of them has been found
-                //     println!("{:?}", &yellow_letter);
-                //
-                //     yellow_letter.count -= 1;
-                //     if yellow_letter.count == 0 {
-                //         //remove the yellow character from the hashset as all of them have been found
-                //         yellow_characters.retain(|x| x.letter != guess_letter);
-                //     } else {
-                //         yellow_characters.replace(yellow_letter);
-                //     }
-                // }
-            }
+            'G' => {}
             'Y' => {
                 let in_hashset_already: Option<YellowCharacter> = yellow_characters
                     .iter()
@@ -164,9 +143,6 @@ fn store_colors(
                     })
                     .count();
 
-                let amount_of_additional_grey_letters_to_store =
-                    amount_of_grey_of_letter_in_word - amount_of_greys_of_letter_already_stored;
-
                 //NOTE: doesnt loop if length is 0 or under, bc of rust thingies
                 for code in amount_of_greys_of_letter_already_stored.clone()
                     ..amount_of_grey_of_letter_in_word.clone()
@@ -201,13 +177,11 @@ pub fn simulate_game(
     let mut turn_count: u8 = 0;
     while turn_count < 6 {
         turn_count += 1;
-        let mut guess_words_distribution = get_letter_distribution(&valid_guess_words);
-        let mut answer_words_distribution = get_letter_distribution(&valid_answer_words);
+        // let guess_words_distribution = get_letter_distribution(&valid_guess_words);
+        let answer_words_distribution = get_letter_distribution(&valid_answer_words);
 
-        let mut guess = get_highest_point_word(
-            &valid_guess_words,
-            &get_letter_distribution(&valid_guess_words),
-        );
+        //NOTE: we only care about the distribution of the answer words, as we are trying to guess the answer
+        let guess = get_highest_point_word(&valid_guess_words, &answer_words_distribution);
 
         if valid_answer_words.len() <= 10 {
             println!("Answer words = {:?}", valid_answer_words);
@@ -221,6 +195,8 @@ pub fn simulate_game(
         }
 
         let colors = get_colors(&answer, &guess);
+
+        println!("{}", colors);
 
         store_colors(
             &guess,

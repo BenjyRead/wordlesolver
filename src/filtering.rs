@@ -41,7 +41,9 @@ fn filter_by_yellow_letters(
     let mut filtered_words = words.clone();
 
     for word in words {
-        for yellow_letter in yellow_letters {
+        let mut filterable_yellows = yellow_letters.clone();
+        filterable_yellows.retain(|letter| letter.count > 0);
+        for yellow_letter in filterable_yellows {
             if word
                 .word
                 .chars()
@@ -185,7 +187,8 @@ mod tests {
         test_filter_by_yellow_letters_2, ["hello"], [('h', [1,2,3,4], 1)], ["hello"],
         test_filter_by_yellow_letters_3, ["hello"], [('l', [0,1,4], 2)], ["hello"],
         test_filter_by_yellow_letters_4, ["hello","world"], [('l', [0,1], 1)], ["hello", "world"],
-        test_filter_by_yellow_letters_5, ["hello","world"], [('l', [0,1,3], 1)], []
+        test_filter_by_yellow_letters_5, ["hello","world"], [('l', [0,1,3], 1)], [],
+        test_filter_by_yellow_letters_6, ["hello","world"], [('l', [0,1,3], 0)], ["hello", "world"]
     }
 
     macro_rules! test_filter_words {
@@ -234,6 +237,7 @@ mod tests {
         test_filter_words_no_grey, ["hello"], [], [('h', 0)], [('h', [4], 1)], ["hello"],
         //TODO: is there a conflict between yellow and green filters?
         test_filter_words_1, ["hello", "world", "soare"], ["l0"], [], [], ["soare"],
-        test_filter_words_2, ["hello", "world", "soare"], ["l1"], [('l', 3)], [('l', [1,2,4], 1)], ["world"]
+        test_filter_words_2, ["hello", "world", "soare"], ["l1"], [('l', 3)], [('l', [1,2,4], 1)], ["world"],
+        test_filter_words_3, ["hello", "world", "soare"], ["l1"], [('l', 3)], [('r', [1,2,4], 0)], ["world"]
     }
 }

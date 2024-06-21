@@ -61,7 +61,7 @@ pub struct YellowCharacter {
     pub not_positions: HashSet<u8>,
     //NOTE: 0-indexed, can be negative because the not_positions are still valuable information
     //even when we dont know any yellows are in the position
-    pub count: i8,
+    pub count: u8,
 }
 
 impl Hash for YellowCharacter {

@@ -64,7 +64,7 @@ fn get_word_points(word: &Word, distribution: &HashMap<String, u32>) -> u32 {
     let mut points = 0;
 
     for letter in &word.letters {
-        points += distribution.get(letter).unwrap();
+        points += distribution.get(letter).unwrap_or(&0);
     }
 
     return points;
