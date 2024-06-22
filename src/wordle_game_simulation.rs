@@ -15,7 +15,19 @@ fn get_greens(answer: &Word, guess: &Word, current_string: &mut String) {
 
 //NOTE: Call after get_greens
 fn get_yellows(answer: &Word, guess: &Word, current_string: &mut String) {
-    let mut potential_yellows = answer.word.clone().replace("G", "_");
+    let mut potential_yellows: String = answer
+        .word
+        .clone()
+        .chars()
+        .enumerate()
+        .map(|(index, element)| {
+            if current_string.chars().nth(index) == Some('G') {
+                '_'
+            } else {
+                element
+            }
+        })
+        .collect();
 
     for (position, guess_letter) in guess.word.chars().enumerate() {
         if current_string.chars().nth(position) != Some('G') {
@@ -309,7 +321,7 @@ mod tests {
         "hello",
         "world",
         "gggGg",
-        "ggYGY",
+        "gggGY",
         test_get_yellows_2,
         "hello",
         "hello",
@@ -342,10 +354,11 @@ mod tests {
     }
 
     test_get_colors! {
-        test_get_colors_1, "hello", "world", "ggYGY",
+        test_get_colors_1, "hello", "world", "gggGY",
         test_get_colors_2, "hello", "hello", "GGGGG",
         test_get_colors_3, "aabbb", "bbaaa", "YYYYg",
-        test_get_colors_4, "hello", "zzzzz", "ggggg"
+        test_get_colors_4, "hello", "zzzzz", "ggggg",
+        test_get_colors_5, "sleet", "thief", "gggGY"
     }
 
     macro_rules! test_store_colors {
