@@ -140,12 +140,14 @@ fn store_colors(
                 }
             }
             'g' => {
-                //TODO: this aint right...
-                let amount_of_greys_of_letter_already_stored = &grey_letters
-                    .clone()
-                    .into_iter()
-                    .filter(|x| x.letter.chars().nth(0) == Some(guess_letter))
-                    .count();
+                let amount_of_letter_in_guess_word =
+                    guess.word.chars().filter(|x| x == &guess_letter).count();
+
+                // let amount_of_greys_of_letter_already_stored = &grey_letters
+                //     .clone()
+                //     .into_iter()
+                //     .filter(|x| x.letter.chars().nth(0) == Some(guess_letter))
+                //     .count();
 
                 let amount_of_grey_of_letter_in_word = colors
                     .chars()
@@ -156,8 +158,9 @@ fn store_colors(
                     .count();
 
                 //NOTE: doesnt loop if length is 0 or under, bc of rust thingies
-                for code in amount_of_greys_of_letter_already_stored.clone()
-                    ..amount_of_grey_of_letter_in_word.clone()
+                for code in amount_of_letter_in_guess_word.clone()
+                    - amount_of_grey_of_letter_in_word.clone()
+                    ..amount_of_letter_in_guess_word.clone()
                 {
                     grey_letters.insert(GreyLetter {
                         letter: guess_letter.to_string() + &code.to_string(),
@@ -484,6 +487,15 @@ mod tests {
         ["h0", "e0"],
         [('w', 0), ('o', 1), ('r', 2), ('l', 3), ('d', 4)],
         [('o', 0, {4}), ('l', 0, {2})],
-        ["h0", "e0"]
+        ["h0", "e0"],
+        test_store_colors_5,
+        "hello",
+        "gggGg",
+        [],
+        [],
+        [],
+        [('l', 3)],
+        [],
+        ["h0", "e0", "l1", "o0"]
     );
 }
